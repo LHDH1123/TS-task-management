@@ -83,3 +83,126 @@ export const changeStatus = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const changeMultiPatch = async (req: Request, res: Response) => {
+  try {
+    enum Key {
+        STATUS = "status",
+        DELETE = "delete"
+    }
+
+    const ids: string[] = req.body.ids;
+    const key: string = req.body.key;
+    const value: string = req.body.value;
+
+    switch (key) {
+      case Key.STATUS:
+        await Task.updateMany(
+          {
+            _id: { $in: ids },
+          },
+          {
+            status: value,
+          }
+        );
+
+        res.json({
+          code: 200,
+          message: "Cập nhật trạng thái thành công!",
+        });
+        break;
+
+      case Key.DELETE:
+        await Task.updateMany(
+          {
+            _id: { $in: ids },
+          },
+          {
+            deleted: true,
+            deletedAt: new Date()
+          }
+        );
+
+        res.json({
+          code: 200,
+          message: "Xóa thành công!",
+        });
+        break;
+
+      default:
+        res.json({
+          code: 400,
+          message: "Không tồn tại!",
+        });
+        break;
+    }
+  } catch (error) {
+    res.json({
+      code: 400,
+      message: "Không tồn tại!",
+    });
+  }
+};
+
+export const createPost = async (req: Request, res: Response) => {
+  try {
+    const task = new Task(req.body);
+    await task.save();
+
+    res.json({
+      code: 200,
+      message: "Tạo công việc thành công!",
+    });
+  } catch (error) {
+    res.json({
+      code: 400,
+      message: "Thất bại!",
+    });
+  }
+};
+
+export const editPatch = async (req: Request, res: Response) => {
+  try {
+    const id: string = req.params.id;
+
+    await Task.updateOne(
+      {
+        _id: id,
+      },
+      req.body
+    );
+
+    res.json({
+      code: 200,
+      message: "Cập nhật thành công!",
+    });
+  } catch (error) {
+    res.json({
+      code: 400,
+      message: "Thất bại!",
+    });
+  }
+};
+
+export const deleteTask = async (req: Request, res: Response) => {
+  try {
+    const id: string = req.params.id;
+
+    await Task.updateOne(
+      {
+        _id: id,
+      },
+      { deleted: true, deletedAt: new Date() }
+    );
+
+    res.json({
+      code: 200,
+      message: "Xóa thành công!",
+    });
+  } catch (error) {
+    res.json({
+      code: 400,
+      message: "Thất bại!",
+    });
+  }
+};
